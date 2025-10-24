@@ -29,7 +29,7 @@ import {
 import fs from "fs";
 import jsonfile from "jsonfile";
 import net from "net";
-import os from "os";
+import os, { platform } from "os";
 import path from "path";
 import { PNG } from "pngjs";
 import { AdvantageScopeAssets } from "../../shared/AdvantageScopeAssets";
@@ -124,6 +124,11 @@ let downloadAddress: string = "";
 let downloadPath: string = "";
 let downloadFileSizeCache: { [id: string]: number } = {};
 let downloadClientIsSaving = false;
+
+// Disable GPU on wayland
+if (process.platform == "linux" && process.env.XDG_SESSION_TYPE === "wayland") {
+  app.disableHardwareAcceleration()
+}
 
 // WINDOW MESSAGE HANDLING
 

@@ -5,6 +5,7 @@
 // license that can be found in the LICENSE file
 // at the root directory of this project.
 
+import { title } from "node:process";
 import { AdvantageScopeAssets } from "../shared/AdvantageScopeAssets";
 import { HubState } from "../shared/HubState";
 import { SIM_ADDRESS, USB_ADDRESS } from "../shared/IPAddresses";
@@ -29,6 +30,7 @@ import FTCDashboardSource from "./dataSources/ftcdashboard/FTCDashboardSource";
 import { NT4Publisher, NT4PublisherStatus } from "./dataSources/nt4/NT4Publisher";
 import NT4Source from "./dataSources/nt4/NT4Source";
 import RLOGServerSource from "./dataSources/rlog/RLOGServerSource";
+import { Console } from "node:console";
 
 // Constants
 const STATE_SAVE_PERIOD_MS = 250;
@@ -995,6 +997,37 @@ async function handleMainMessage(message: NamedMessage) {
       }
       window.selection.setSelectedTime(scaleValue(message.data, [0, 1], range));
       break;
+    
+    case "compare-outputs": {
+      let logPath = historicalSources.length > 0 ? historicalSources[0].path : null;
+      let isAkit = window.log.getFieldKeys().find((key) => AKIT_TIMESTAMP_KEYS.includes(key)) !== undefined;
+      if (logPath === null) {
+        window.sendMainMessage("error", {
+          title: "Cannot compare output data",
+          content: "Please open an AdvantageKit log file, then try again."
+        });
+      } else if (!isAkit) {
+        window.sendMainMessage("error", {
+          title: "Cannot compare output data",
+          content: "This log file is not an AdvantageKit log file."
+        });
+      } else if (!("ReplayOutputs" in window.log.getFieldTree())) {
+        window.sendMainMessage("error", {
+          title: "Cannot compare output data",
+          content: "This log file has not been replayed, and there are no replayed outputs."
+        });
+      } else {
+        let tree = window.log.getFieldTree()
+        console.log(tree)
+        // T
+
+        window.sendMainMessage("alert", {
+          title: "Output Comparison",
+          content: "Outputs are identical! (not really this is just test code)"
+        })
+      }
+      break;
+    }
 
     default:
       console.warn("Unknown message from main process", message);

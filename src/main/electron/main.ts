@@ -2008,6 +2008,15 @@ function setupMenu() {
         },
         { type: "separator" },
         {
+          label: "Output Comparison",
+          click(_, baseWindow) {
+            const window = baseWindow as BrowserWindow | undefined
+            if (window === undefined || !hubWindows.includes(window)) return;
+            sendMessage(window, "compare-outputs")
+          },
+        },
+        { type: "separator" },
+        {
           label: "Export Layout...",
           click() {
             dialog

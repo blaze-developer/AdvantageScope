@@ -2476,7 +2476,7 @@ function setupMenu() {
 function createAboutWindow() {
   let detailLines: string[] = [];
   detailLines.push("Version: " + (app.isPackaged ? app.getVersion() : "Development"));
-  detailLines.push("Distribution: " + (DISTRIBUTION === Distribution.WPILib ? "WPILib" : "FRC 6328"));
+  detailLines.push("Distribution: " + "FRC 1425");
   detailLines.push("Platform: " + process.platform + "-" + process.arch);
   detailLines.push("Build Date: " + BUILD_DATE);
   detailLines.push("Electron: " + process.versions.electron);
@@ -2655,7 +2655,7 @@ function createHubWindow(state?: WindowState) {
       platformArch: app.runningUnderARM64Translation ? "arm64" : process.arch, // Arch of OS, not this binary
       appVersion: APP_VERSION
     });
-    sendMessage(window, "show-update-button", updateChecker.getShouldPrompt());
+    // sendMessage(window, "show-update-button", updateChecker.getShouldPrompt());
     sendMessage(window, "show-feedback-button", isBeta());
     sendMessage(window, "show-when-ready");
     sendAllPreferences();
@@ -3396,7 +3396,7 @@ function openBetaWelcome(parentWindow: Electron.BrowserWindow) {
 function checkForUpdate(alwaysPrompt: boolean) {
   updateChecker.check().then(() => {
     hubWindows.forEach((window) => {
-      sendMessage(window, "show-update-button", updateChecker.getShouldPrompt());
+      // sendMessage(window, "show-update-button", updateChecker.getShouldPrompt());
     });
     if (alwaysPrompt) {
       updateChecker.showPrompt();

@@ -28,6 +28,8 @@ import GamePieceManager from "./field3d/objectManagers/GamePieceManager";
 import HeatmapManager from "./field3d/objectManagers/HeatmapManager";
 import RobotManager from "./field3d/objectManagers/RobotManager";
 import TrajectoryManager from "./field3d/objectManagers/TrajectoryManager";
+import { getMatchInfo } from "../log/LogUtil";
+import MatchInfo, { MatchType } from "../MatchInfo";
 
 export default class Field3dRendererImpl implements TabRenderer {
   private LOWER_POWER_MAX_FPS = 30;
@@ -104,6 +106,7 @@ export default class Field3dRendererImpl implements TabRenderer {
   private dsCameraGroup: THREE.Group;
   private dsCameraObj: THREE.Object3D;
   private spotLights: THREE.SpotLight[] = [];
+  private allianceLights: THREE.PointLight[] = [];
 
   private objectManagers: {
     type: Field3dRendererCommand_AnyObj["type"];
@@ -133,6 +136,7 @@ export default class Field3dRendererImpl implements TabRenderer {
   private lastFieldId: string = "";
   private lastIsFTC: boolean | null = null;
   private lastCoordinateSystem: CoordinateSystem | null = null;
+  private lastMatchType: MatchType | null = null;
   private keysPressed: Set<string> = new Set();
 
   static {
@@ -240,11 +244,13 @@ export default class Field3dRendererImpl implements TabRenderer {
         const light = new THREE.PointLight(0xff0000, 60);
         light.position.set(-4.5, 0, 5);
         this.wpilibCoordinateGroup.add(light);
+        this.allianceLights.push(light);
       }
       {
         const light = new THREE.PointLight(0x0000ff, 60);
         light.position.set(4.5, 0, 5);
         this.wpilibCoordinateGroup.add(light);
+        this.allianceLights.push(light);
       }
     }
 
@@ -750,6 +756,22 @@ export default class Field3dRendererImpl implements TabRenderer {
           this.isFieldLoading = false;
         });
       }
+    }
+
+    let matchInfo = getMatchInfo(window.log);
+
+    if (matchInfo && matchInfo.matchType != this.lastMatchType) {
+      this.spotLights.forEach((light, i) => {
+        light.intensity = fieldConfig.isFTC ? this.SPOT_LIGHT_INTENSITY_FTC : this.SPOT_LIGHT_INTENSITY_FRC;
+        if (matchInfo.matchType == MatchType.Elimination) light.intensity *= 0.8;
+      });
+
+      this.allianceLights.forEach((light, i) => {
+        light.intensity = 60;
+        if (matchInfo.matchType == MatchType.Elimination) light.intensity *= 2.0;
+      });
+
+      this.lastMatchType = matchInfo.matchType;
     }
 
     // Update primary robot
